@@ -1,0 +1,696 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>La Dulcería</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+/* Escenario de chocolate arriba (escenas que rotan tipo historia) y panel de la pastelería abajo sobre crema y blanco. */
+:root{
+  --bg:#F4EADB;          /* crema */
+  --surface:#FFFDF9;     /* blanco */
+  --latte:#EADBC4;
+  --ink:#2B1A10;
+  --muted:#7F6654;
+  --cocoa:#4A2C1A;
+  --cocoa-hi:#3A2213;
+  --caramel:#B9783F;
+  --caramel-hi:#E8B47E;
+  --line:rgba(43,26,16,.12);
+  --ok:#56703F;
+  --warn:#A8692A;
+  --low:#B0472F;
+  --stage:#1F130B;
+  --stage-fg:#F6EEE2;
+  --stage-muted:#C2AB93;
+  --display:"Fraunces", Georgia, "Times New Roman", serif;
+  --body:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:500 15px/1.5 var(--body);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+button:disabled{cursor:default}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--caramel-hi);outline-offset:2px}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- Escenario ---------- */
+.stage{background:var(--stage);color:var(--stage-fg);position:relative;overflow:hidden;padding-block:28px 28px}
+.brandbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:26px}
+.logo{font-family:var(--display);font-style:italic;font-weight:600;font-size:24px;letter-spacing:-.01em;color:var(--stage-fg)}
+.logo span{color:var(--caramel-hi)}
+.open{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--stage-muted);display:inline-flex;align-items:center;gap:8px}
+.open i{width:8px;height:8px;border-radius:50%;background:#8DB36A;box-shadow:0 0 0 4px rgba(141,179,106,.18)}
+.hero h1{font-family:var(--display);font-weight:700;font-size:clamp(34px,8vw,64px);line-height:1.02;letter-spacing:-.02em;margin:0;text-wrap:balance}
+.hero h1 em{color:var(--caramel-hi);font-style:italic;font-weight:600}
+.hero .sub{margin:14px 0 0;font-size:clamp(16px,3.6vw,20px);color:var(--stage-muted);max-width:52ch}
+
+.frame{position:relative;margin-top:26px;border-radius:28px;overflow:hidden;border:1px solid rgba(246,238,226,.12);background:radial-gradient(120% 90% at 50% 0%,#55331D 0%,#1F130B 64%);display:grid;padding:22px 16px 20px}
+.glow{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.glow i{position:absolute;width:44%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(232,164,96,.65),rgba(232,164,96,0) 68%);filter:blur(8px);animation:drift 16s ease-in-out infinite alternate}
+.glow i:nth-child(1){left:-12%;top:6%}
+.glow i:nth-child(2){right:-14%;top:34%;width:50%;animation-duration:19s;background:radial-gradient(circle,rgba(246,220,190,.45),rgba(246,220,190,0) 68%)}
+.glow i:nth-child(3){left:28%;bottom:-22%;width:40%;animation-duration:23s}
+@keyframes drift{to{transform:translate(5%,-7%) scale(1.08)}}
+
+.scene{grid-area:1/1;position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;opacity:0;transform:translateY(14px) scale(.985);transition:opacity .6s ease,transform .6s ease;pointer-events:none;visibility:hidden}
+.scene.on{opacity:1;transform:none;pointer-events:auto;visibility:visible}
+.scene h2{margin:0;font-family:var(--display);font-weight:600;font-size:clamp(24px,5.5vw,36px);line-height:1.1;text-wrap:balance}
+.scene p{margin:0;color:var(--stage-muted)}
+.sa{display:flex;flex-direction:column;align-items:center;gap:18px}
+.sa .txt{display:flex;flex-direction:column;align-items:center;gap:12px;max-width:40ch}
+@media (min-width:760px){
+  .sa{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:48px;text-align:left;justify-items:start;padding-inline:24px}
+  .sa .txt{align-items:flex-start}
+}
+
+.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid currentColor;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+.pill i{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
+.pill.caramel{color:var(--caramel-hi);background:rgba(185,120,63,.14)}
+.pill.light{color:var(--stage-fg);background:rgba(246,238,226,.06)}
+
+/* Teléfono con la carta de postres */
+.phone{width:min(272px,82vw);max-width:100%;aspect-ratio:9/18.6;border-radius:40px;background:#120B06;padding:9px;box-shadow:0 30px 60px -20px rgba(0,0,0,.6),0 0 0 1px rgba(246,238,226,.08) inset}
+.screen{background:var(--surface);color:var(--ink);border-radius:32px;height:100%;overflow:hidden;display:flex;flex-direction:column;text-align:left}
+.p-head{display:flex;justify-content:space-between;align-items:center;padding:16px 16px 6px}
+.p-brand{font-family:var(--display);font-style:italic;font-weight:600;font-size:18px;color:var(--cocoa)}
+.p-mesa{font-size:11px;font-weight:800;letter-spacing:.06em;background:var(--cocoa);color:var(--surface);border-radius:999px;padding:4px 10px}
+.p-search{margin:6px 12px 8px;display:flex;align-items:center;background:var(--latte);border-radius:12px;padding:0 10px}
+.p-search input{border:0;background:transparent;width:100%;padding:9px 4px;font-size:13px;outline:none;color:var(--ink)}
+.p-search input::placeholder{color:var(--muted)}
+.p-chips{display:flex;gap:6px;padding:0 12px 8px;overflow-x:auto;scrollbar-width:none}
+.p-chips::-webkit-scrollbar{display:none}
+.chip{flex:none;font-size:12px;font-weight:700;padding:6px 11px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--cocoa);color:var(--surface);border-color:var(--cocoa)}
+.p-list{flex:1;overflow-y:auto;padding:4px 10px 8px;display:flex;flex-direction:column;gap:8px;min-height:0}
+.p-item{position:relative;display:flex;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px}
+.p-item.out{opacity:.55}
+.p-tile{flex:none;width:46px;height:46px;border-radius:12px;color:#FFF6EA;display:grid;place-items:center;font-family:var(--display);font-style:italic;font-weight:600;font-size:17px;letter-spacing:-.02em;box-shadow:inset 0 -6px 0 rgba(0,0,0,.12)}
+.p-info{flex:1;min-width:0}
+.p-info h4{margin:0;padding-right:18px;font-size:13px;font-weight:800;line-height:1.25}
+.p-info p{margin:2px 0 4px;font-size:11px;color:var(--muted);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.p-price{font-size:12px;font-weight:800;color:var(--cocoa);font-variant-numeric:tabular-nums}
+.p-left{font-size:10.5px;font-weight:800;color:var(--low);margin-left:6px}
+.p-ops{align-self:flex-end;display:flex}
+.fav{position:absolute;top:6px;right:6px;font-size:16px;line-height:1;color:var(--muted);padding:4px}
+.fav[aria-pressed="true"]{color:var(--caramel)}
+.qty{display:flex;align-items:center;gap:4px;background:var(--latte);border-radius:999px;padding:2px}
+.qty button{width:22px;height:22px;border-radius:50%;background:var(--surface);font-weight:800;color:var(--cocoa)}
+.qty button:disabled{opacity:.35}
+.qty span{min-width:14px;text-align:center;font-size:12px;font-weight:800;font-variant-numeric:tabular-nums}
+.soldout{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--low);background:rgba(176,71,47,.1);border-radius:999px;padding:4px 8px}
+.p-empty{font-size:12px;color:var(--muted);text-align:center;padding:24px 8px}
+.p-cart{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--cocoa);color:var(--surface);margin:0 10px 10px;border-radius:16px;padding:10px 12px}
+.p-cart small{display:block;font-size:11px;opacity:.8}
+.p-cart b{font-size:15px;font-variant-numeric:tabular-nums}
+.p-cart button{background:var(--caramel-hi);color:var(--ink);font-weight:800;font-size:12px;border-radius:999px;padding:9px 12px;white-space:nowrap}
+.p-cart button:disabled{opacity:.4}
+
+/* Escena 2: seguimiento del pedido */
+.ticket{width:min(340px,100%);background:var(--surface);color:var(--ink);border-radius:22px;padding:18px;text-align:left;box-shadow:0 30px 60px -28px rgba(0,0,0,.7)}
+.ticket header{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12px;color:var(--muted);font-weight:700}
+.ticket header strong{color:var(--ink);font-family:var(--display);font-style:italic;font-weight:600;font-size:18px}
+.ticket ul{list-style:none;margin:14px 0;padding:12px 0;border-block:1px dashed var(--line);display:grid;gap:6px;font-size:13px}
+.ticket li{display:flex;justify-content:space-between;gap:10px}
+.ticket .total{display:flex;justify-content:space-between;font-weight:800;font-variant-numeric:tabular-nums}
+.steps{list-style:none;margin:18px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:10.5px;font-weight:800;color:var(--muted);text-align:center}
+.steps li{position:relative;padding-top:14px}
+.steps li::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;border-radius:4px;background:var(--latte)}
+.scene.on .steps li{animation:lit .4s forwards}
+.scene.on .steps li::before{animation:bar .4s forwards}
+.scene.on .steps li:nth-child(1),.scene.on .steps li:nth-child(1)::before{animation-delay:.3s}
+.scene.on .steps li:nth-child(2),.scene.on .steps li:nth-child(2)::before{animation-delay:1.2s}
+.scene.on .steps li:nth-child(3),.scene.on .steps li:nth-child(3)::before{animation-delay:2.1s}
+.scene.on .steps li:nth-child(4),.scene.on .steps li:nth-child(4)::before{animation-delay:3s}
+@keyframes lit{to{color:var(--ink)}}
+@keyframes bar{to{background:var(--caramel)}}
+
+/* Escena 3: tiempo real */
+.bigsales{font-family:var(--display);font-weight:700;font-size:clamp(46px,12vw,84px);line-height:1;letter-spacing:-.02em;margin:0;font-variant-numeric:tabular-nums;color:var(--stage-fg)}
+.clock{display:inline-flex;align-items:center;gap:12px;background:rgba(246,238,226,.08);border:1px solid rgba(246,238,226,.18);border-radius:999px;padding:10px 20px;font-variant-numeric:tabular-nums}
+.clock .c-day{color:var(--caramel-hi);font-weight:800;letter-spacing:.1em;font-size:14px}
+.clock .c-time{font-size:26px;font-weight:800}
+.eyebrow{font-size:13px!important;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+
+/* Controles de la historia */
+.controls{display:flex;align-items:center;gap:14px;margin-top:20px}
+.arrow{width:38px;height:38px;border-radius:50%;background:rgba(246,238,226,.1);color:var(--stage-fg);font-size:20px;line-height:1;flex:none;display:grid;place-items:center}
+.arrow:hover{background:rgba(246,238,226,.18)}
+.progress{flex:1;display:flex;gap:8px}
+.seg{position:relative;flex:1;height:18px;display:flex;align-items:center}
+.seg::before{content:"";position:absolute;left:0;right:0;height:4px;border-radius:4px;background:rgba(246,238,226,.2)}
+.seg .fill{position:absolute;left:0;right:0;height:4px;border-radius:4px;background:var(--caramel-hi);transform:scaleX(0);transform-origin:left}
+.seg.done .fill{transform:scaleX(1)}
+.seg.on .fill{animation:fill 5s linear forwards}
+.frame.paused ~ .controls .seg.on .fill{animation-play-state:paused}
+@keyframes fill{to{transform:scaleX(1)}}
+
+/* ---------- Operación ---------- */
+.ops{padding-block:28px 56px}
+.ops-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border:1px solid var(--line);border-radius:22px;padding:14px 16px;background:var(--surface)}
+.ops-top .pill{color:var(--cocoa);background:none}
+.ops-title{font-family:var(--display);font-weight:700;font-size:20px;color:var(--cocoa)}
+.ops-top .clock{background:var(--cocoa);border-color:var(--cocoa);color:var(--surface)}
+.tabs{display:flex;gap:6px;margin:18px 0 14px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;padding:9px 16px;border-radius:999px;font-weight:700;color:var(--muted);border:1px solid transparent;display:inline-flex;align-items:center;gap:6px}
+.tab[aria-selected="true"]{background:var(--cocoa);color:var(--surface)}
+.tab:not([aria-selected="true"]):hover{border-color:var(--line);color:var(--ink)}
+.tab .dot{min-width:18px;height:18px;border-radius:999px;background:var(--low);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;padding:0 5px}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;min-width:0}
+.kpi > span{display:block;font-size:12px;color:var(--muted);font-weight:700;letter-spacing:.02em}
+.kpi b{display:block;font-family:var(--display);font-size:clamp(17px,4.6vw,28px);font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpi small{font-family:var(--body);font-size:12px;color:var(--muted);font-weight:600;margin-left:6px}
+@media (max-width:560px){.kpi{padding:12px}.kpi small{display:block;margin:2px 0 0;white-space:normal}}
+.panel{margin-top:14px}
+.board{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.col{background:var(--latte);border-radius:20px;padding:12px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.col header{display:flex;align-items:center;gap:8px;font-weight:800;font-size:14px;padding:2px 4px}
+.count{font-size:12px;background:var(--surface);border-radius:999px;padding:1px 8px;font-variant-numeric:tabular-nums}
+.ord{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:4px}
+.ord-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.oid{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.omesa{font-family:var(--display);font-size:20px;font-weight:700}
+.ometa{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.olines{margin:4px 0 0;padding:0;list-style:none;font-size:13px;display:grid;gap:2px}
+.tag{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:4px 9px;white-space:nowrap}
+.tag.nuevo{background:rgba(185,120,63,.16);color:#8A4F22}
+.tag.obrador{background:rgba(168,105,42,.16);color:var(--warn)}
+.tag.listo{background:rgba(86,112,63,.16);color:var(--ok)}
+.tag.camino{background:rgba(74,44,26,.12);color:var(--cocoa)}
+.act{margin-top:8px;justify-self:start;background:var(--cocoa);color:var(--surface);font-weight:800;font-size:13px;border-radius:999px;padding:9px 14px}
+.act:hover{background:var(--cocoa-hi)}
+.act.ghost{background:transparent;color:var(--cocoa);border:1px solid var(--cocoa)}
+.act.ghost:hover{background:rgba(74,44,26,.06)}
+.empty{margin:0;font-size:13px;color:var(--muted);padding:14px 4px}
+.hint{font-size:13px;color:var(--muted);margin:0 0 12px}
+.tables{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+.table-btn{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px 10px;text-align:left;display:grid;gap:4px}
+.table-btn b{font-family:var(--display);font-size:18px}
+.table-btn span{font-size:12px;font-weight:700;color:var(--ok)}
+.table-btn.occ{background:var(--cocoa);border-color:var(--cocoa);color:var(--surface)}
+.table-btn.occ span{color:var(--caramel-hi)}
+.case{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.tray{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center}
+.tray .p-tile{grid-row:span 2;width:42px;height:42px;font-size:16px}
+.tray h4{margin:0;font-size:14px;font-weight:800;display:flex;justify-content:space-between;gap:8px}
+.tray h4 span{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700}
+.tray .bar{height:8px;border-radius:8px;background:var(--latte);overflow:hidden}
+.tray .bar i{display:block;height:100%;background:var(--caramel);border-radius:8px;transition:width .5s ease}
+.tray.low .bar i{background:var(--low)}
+.tray.low h4 span{color:var(--low)}
+.tray footer{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px;font-size:12px;color:var(--muted)}
+.tray .act{margin:0;padding:7px 12px;font-size:12px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:8px;flex-wrap:wrap}
+.row .act{margin:0}
+.bars{display:grid;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px}
+.bars .lbl{display:flex;justify-content:space-between;font-size:14px;font-weight:700;margin-bottom:6px;font-variant-numeric:tabular-nums}
+.bars .track{height:12px;background:var(--latte);border-radius:12px;overflow:hidden}
+.bars .track i{display:block;height:100%;background:linear-gradient(90deg,var(--caramel-hi),var(--caramel));border-radius:12px;transition:width .6s ease}
+.top{margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px}
+.top h4{margin:0 0 10px;font-family:var(--display);font-size:18px}
+.top ol{margin:0;padding-left:20px;display:grid;gap:4px;font-size:14px}
+.top li span{float:right;color:var(--muted);font-variant-numeric:tabular-nums}
+.close{margin-top:18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.close .act{margin:0}
+
+/* Pie y CTA */
+.cta{background:var(--cocoa);color:var(--stage-fg);padding-block:44px 52px}
+.cta h3{font-family:var(--display);font-size:clamp(26px,5vw,40px);line-height:1.1;margin:0 0 10px;font-weight:700;text-wrap:balance}
+.cta h3 em{color:var(--caramel-hi);font-weight:600}
+.cta p{margin:0 0 20px;color:var(--stage-muted);max-width:52ch}
+.cta a{display:inline-flex;align-items:center;gap:8px;background:var(--surface);color:var(--cocoa);text-decoration:none;font-weight:800;border-radius:999px;padding:14px 22px}
+.cta a:hover{background:var(--latte)}
+.cta .phone-num{display:block;margin-top:12px;font-size:13px;color:var(--stage-muted);user-select:all}
+
+.toast{position:fixed;left:50%;bottom:max(20px,env(safe-area-inset-bottom,0px));transform:translate(-50%,160%);background:var(--ink);color:var(--surface);border-radius:999px;padding:12px 18px;font-weight:700;font-size:14px;z-index:20;transition:transform .4s ease;max-width:calc(100% - 32px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toast.on{transform:translate(-50%,0)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+
+<section class="stage">
+  <div class="wrap">
+    <div class="brandbar">
+      <span class="logo">La Dulcer<span>í</span>a</span>
+      <span class="open"><i></i>Abierto hoy</span>
+    </div>
+    <div class="hero">
+      <h1>La mesa <span class="num" id="mesaHero">4</span> escaneó el QR.<br><em>Así llega el postre a la mesa.</em></h1>
+      <p class="sub">Un código en cada mesa. La carta de postres, los pedidos y la vitrina, en un solo lugar.</p>
+    </div>
+
+    <div class="frame" id="frame">
+      <div class="glow" aria-hidden="true"><i></i><i></i><i></i></div>
+
+      <!-- Escena 1: carta en el teléfono -->
+      <div class="scene sa on" data-scene="0">
+        <div class="phone" aria-label="Carta de postres en un teléfono">
+          <div class="screen">
+            <div class="p-head">
+              <span class="p-brand">La Dulcería</span>
+              <span class="p-mesa">Mesa <span id="mesaPhone">4</span></span>
+            </div>
+            <label class="p-search">
+              <input id="q" type="search" placeholder="¿Qué se te antoja?" aria-label="Buscar en la carta" autocomplete="off">
+            </label>
+            <div class="p-chips" id="chips" role="group" aria-label="Categorías"></div>
+            <div class="p-list" id="list"></div>
+            <div class="p-cart">
+              <div><small id="cartCount">Tu pedido está vacío</small><b id="cartTotal">$ 0</b></div>
+              <button id="send" disabled>Pedir ahora</button>
+            </div>
+          </div>
+        </div>
+        <div class="txt">
+          <span class="pill caramel"><i></i>Mesa <span class="num" id="mesaTag">4</span></span>
+          <h2>Se abre la carta. Sin descargar nada.</h2>
+          <p>Elige el postre, suma porciones y pide. Si en la vitrina quedan pocas, la carta lo avisa.</p>
+        </div>
+      </div>
+
+      <!-- Escena 2: seguimiento del pedido -->
+      <div class="scene" data-scene="1">
+        <h2>Pide sin esperar a que te atiendan.</h2>
+        <div class="ticket">
+          <header><span id="tkHead">Pedido #A1F2 · Mesa 4</span><strong>Confirmado</strong></header>
+          <ul id="tkLines"></ul>
+          <div class="total"><span>Total</span><span class="num" id="tkTotal">$ 0</span></div>
+          <ol class="steps">
+            <li>Confirmado</li>
+            <li>En obrador</li>
+            <li>Listo</li>
+            <li>En la mesa</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Escena 3: el local en tiempo real -->
+      <div class="scene" data-scene="2">
+        <span class="pill light"><i></i>Turno en curso</span>
+        <p class="eyebrow">Ventas del día</p>
+        <p class="bigsales" id="bigSales">$ 0</p>
+        <div class="clock"><span class="c-day" data-day>SÁB</span><span class="c-time" data-time>16:30</span></div>
+        <h2>Tu dulcería, en tiempo real.</h2>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="arrow" id="prev" aria-label="Escena anterior">‹</button>
+      <div class="progress" id="progress">
+        <button class="seg on" aria-label="Escena 1"><span class="fill"></span></button>
+        <button class="seg" aria-label="Escena 2"><span class="fill"></span></button>
+        <button class="seg" aria-label="Escena 3"><span class="fill"></span></button>
+      </div>
+      <button class="arrow" id="next" aria-label="Escena siguiente">›</button>
+    </div>
+  </div>
+</section>
+
+<section class="ops wrap" aria-label="Operación de la dulcería">
+  <div class="ops-top">
+    <span class="pill"><i></i>La Dulcería</span>
+    <span class="ops-title">Mostrador</span>
+    <div class="clock"><span class="c-day" data-day>SÁB</span><span class="c-time" data-time>16:30</span></div>
+  </div>
+
+  <nav class="tabs" role="tablist" aria-label="Secciones">
+    <button class="tab" role="tab" data-tab="resumen" aria-selected="true">Resumen</button>
+    <button class="tab" role="tab" data-tab="mesas" aria-selected="false">Mesas</button>
+    <button class="tab" role="tab" data-tab="vitrina" aria-selected="false">Vitrina <span class="dot" id="lowDot" hidden></span></button>
+    <button class="tab" role="tab" data-tab="obrador" aria-selected="false">Obrador</button>
+    <button class="tab" role="tab" data-tab="caja" aria-selected="false">Caja</button>
+  </nav>
+
+  <div class="kpis">
+    <div class="kpi"><span>Ventas del día</span><b id="kSales">$ 0</b></div>
+    <div class="kpi"><span>Pedidos activos</span><b><span id="kActive">0</span><small id="kUnconf">0 sin confirmar</small></b></div>
+    <div class="kpi"><span>Mesas ocupadas</span><b><span id="kTables">0</span><small>de 12</small></b></div>
+  </div>
+
+  <div class="panel" id="panel" role="tabpanel"></div>
+</section>
+
+<section class="cta">
+  <div class="wrap">
+    <h3>Tus postres en un QR. <em>Tu vitrina en un panel.</em></h3>
+    <p>Así se vería La Dulcería con carta digital. Si quieres algo así para tu local, escríbenos.</p>
+    <a href="https://wa.me/584145297381?text=Hola%2C%20quiero%20la%20carta%20digital%20para%20mi%20dulcer%C3%ADa" target="_blank" rel="noopener">Escribir por WhatsApp</a>
+    <span class="phone-num">+58 414 529 7381</span>
+  </div>
+</section>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+  const fmt = n => '$ ' + String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- Reloj ---------- */
+  function clockTick(){
+    const now = new Date();
+    const day = new Intl.DateTimeFormat('es', {weekday:'short'}).format(now).replace('.', '').toUpperCase();
+    const time = now.toLocaleTimeString('es-VE', {hour:'2-digit', minute:'2-digit', hour12:false});
+    $$('[data-day]').forEach(el => el.textContent = day);
+    $$('[data-time]').forEach(el => el.textContent = time);
+  }
+  clockTick(); setInterval(clockTick, 30000);
+
+  /* ---------- Mesa desde el enlace (?mesa=4) ---------- */
+  let mesa = 4;
+  try { const m = parseInt(new URLSearchParams(location.search).get('mesa'), 10); if (m > 0 && m <= 12) mesa = m; } catch(e){}
+  ['#mesaHero','#mesaPhone','#mesaTag'].forEach(s => $(s).textContent = mesa);
+
+  /* ---------- Carta y vitrina ---------- */
+  // stock = porciones que quedan en la vitrina; batch = porciones que trae una bandeja nueva del obrador
+  const MENU = [
+    {id:'tres',  cat:'Tortas',   name:'Torta tres leches',     desc:'Bizcocho empapado y merengue tostado.',    price:5500, tone:'#D9B38A', ab:'3L', stock:9,  batch:12},
+    {id:'choco', cat:'Tortas',   name:'Torta de chocolate',    desc:'Húmeda, con ganache de cacao al 60 %.',    price:6000, tone:'#5A3320', ab:'Ch', stock:4,  batch:12},
+    {id:'zana',  cat:'Tortas',   name:'Torta de zanahoria',    desc:'Con nueces y frosting de queso crema.',     price:5800, tone:'#C9874D', ab:'Za', stock:7,  batch:10},
+    {id:'ques',  cat:'Fríos',    name:'Quesillo',              desc:'Flan de la casa con caramelo oscuro.',      price:4200, tone:'#C88A3E', ab:'Qs', stock:10, batch:12},
+    {id:'marq',  cat:'Fríos',    name:'Marquesa de chocolate', desc:'Capas de galleta María y crema de cacao.',  price:5800, tone:'#6B4029', ab:'Mq', stock:2,  batch:8},
+    {id:'chees', cat:'Fríos',    name:'Cheesecake de fresa',   desc:'Base de galleta y coulis de fresa.',        price:6500, tone:'#B7655A', ab:'Cc', stock:6,  batch:10},
+    {id:'bien',  cat:'Fríos',    name:'Bienmesabe',            desc:'Crema de coco, bizcochuelo y canela.',      price:5000, tone:'#E1C9A5', ab:'Bm', stock:5,  batch:8},
+    {id:'golf',  cat:'Horneados',name:'Golfeado con queso',    desc:'Papelón, anís y queso de mano.',            price:4800, tone:'#A9673A', ab:'Gf', stock:8,  batch:12},
+    {id:'alfa',  cat:'Horneados',name:'Alfajores x3',          desc:'Rellenos de arequipe y coco rallado.',      price:4000, tone:'#D7A46E', ab:'Af', stock:12, batch:15},
+    {id:'galle', cat:'Horneados',name:'Galletas de avena x4',  desc:'Con pasas y un toque de canela.',           price:3200, tone:'#B98A56', ab:'Ga', stock:0,  batch:15},
+    {id:'cafe',  cat:'Bebidas',  name:'Café con leche',        desc:'Espresso doble y leche cremada.',           price:2500, tone:'#8A5A3A', ab:'Cl', stock:40, batch:40},
+    {id:'choc',  cat:'Bebidas',  name:'Chocolate caliente',    desc:'Cacao venezolano y un toque de canela.',    price:3200, tone:'#4E2C1A', ab:'Ca', stock:30, batch:30}
+  ];
+  const BY = Object.fromEntries(MENU.map(m => [m.id, m]));
+  const CATS = ['Todos','Tortas','Fríos','Horneados','Bebidas'];
+  const LOW = 3;
+  const favs = new Set();
+  const cart = {};
+  let cat = 'Todos', query = '';
+
+  const tile = m => `<div class="p-tile" style="background:linear-gradient(145deg,${m.tone},color-mix(in srgb,${m.tone} 70%,#2B1A10))" aria-hidden="true">${m.ab}</div>`;
+
+  function renderChips(){
+    $('#chips').innerHTML = CATS.map(c =>
+      `<button class="chip" data-cat="${c}" aria-pressed="${c===cat}">${c}</button>`).join('');
+  }
+  function renderList(){
+    const q = query.trim().toLowerCase();
+    const items = MENU.filter(m =>
+      (cat === 'Todos' || m.cat === cat) &&
+      (!q || m.name.toLowerCase().includes(q) || m.desc.toLowerCase().includes(q)));
+    $('#list').innerHTML = items.length ? items.map(m => {
+      const n = cart[m.id] || 0, out = m.stock === 0;
+      const left = !out && m.stock <= LOW ? `<span class="p-left">Quedan ${m.stock}</span>` : '';
+      return `<article class="p-item${out ? ' out' : ''}">
+        ${tile(m)}
+        <div class="p-info"><h4>${m.name}</h4><p>${m.desc}</p><span class="p-price">${fmt(m.price)}</span>${left}</div>
+        <div class="p-ops">
+          <button class="fav" data-fav="${m.id}" aria-pressed="${favs.has(m.id)}" aria-label="Marcar favorito">${favs.has(m.id) ? '♥' : '♡'}</button>
+          ${out ? '<span class="soldout">Agotado</span>' : `<div class="qty">
+            <button data-dec="${m.id}" aria-label="Quitar uno" ${n ? '' : 'disabled'}>−</button>
+            <span>${n}</span>
+            <button data-inc="${m.id}" aria-label="Agregar uno" ${n >= m.stock ? 'disabled' : ''}>+</button>
+          </div>`}
+        </div>
+      </article>`;
+    }).join('') : '<p class="p-empty">Ningún postre coincide con la búsqueda.</p>';
+  }
+  function itemsInfo(items){
+    let count = 0, total = 0;
+    for (const id in items) { count += items[id]; total += items[id] * BY[id].price; }
+    return {count, total};
+  }
+  function renderCart(){
+    const {count, total} = itemsInfo(cart);
+    $('#cartCount').textContent = count ? `${count} ${count===1?'ítem':'ítems'}` : 'Tu pedido está vacío';
+    $('#cartTotal').textContent = fmt(total);
+    $('#send').disabled = count === 0;
+  }
+
+  $('#chips').addEventListener('click', e => {
+    const b = e.target.closest('[data-cat]'); if (!b) return;
+    cat = b.dataset.cat; renderChips(); renderList();
+  });
+  $('#q').addEventListener('input', e => { query = e.target.value; renderList(); });
+  $('#list').addEventListener('click', e => {
+    const t = e.target.closest('button'); if (!t || t.disabled) return;
+    if (t.dataset.fav) { favs.has(t.dataset.fav) ? favs.delete(t.dataset.fav) : favs.add(t.dataset.fav); }
+    if (t.dataset.inc) { const id = t.dataset.inc; cart[id] = Math.min(BY[id].stock, (cart[id] || 0) + 1); }
+    if (t.dataset.dec) { const id = t.dataset.dec; cart[id] = (cart[id] || 0) - 1; if (cart[id] <= 0) delete cart[id]; }
+    renderList(); renderCart();
+  });
+  $('#send').addEventListener('click', () => {
+    if (!itemsInfo(cart).count) return;
+    const items = {...cart};
+    MENU.forEach(m => delete cart[m.id]);
+    placeOrder('Mesa ' + mesa, items);
+    renderList(); renderCart();
+    toast('Pedido enviado al obrador');
+  });
+
+  /* ---------- Pedidos ---------- */
+  const BASE = 186400;
+  const FLOW = ['nuevo','obrador','listo','camino','entregado'];
+  const LBL = {nuevo:'Nuevo', obrador:'En obrador', listo:'Listo', camino:'En la mesa', entregado:'Entregado'};
+  const ACT = {nuevo:'Confirmar', obrador:'Marcar listo', listo:'Llevar a la mesa', camino:'Entregado'};
+  const newId = () => Math.random().toString(16).slice(2,8).toUpperCase();
+  const min = m => Date.now() - m * 60000;
+  let orders = [
+    {id:'7A31C2', mesa:'Mesa 2',     items:{tres:2, cafe:2},          st:'obrador', t:min(6)},
+    {id:'B89D2E', mesa:'Para llevar',items:{alfa:2, choco:1, ques:2}, st:'obrador', t:min(3)},
+    {id:'C04E19', mesa:'Mesa 9',     items:{chees:1, choc:1},         st:'camino',  t:min(14)},
+    {id:'3D8A0F', mesa:'Mesa 7',     items:{golf:2, cafe:1},          st:'listo',   t:min(9)}
+  ];
+  const ZONES = [{name:'Terraza', from:1, to:4}, {name:'Salón', from:5, to:9}, {name:'Barra', from:10, to:12}];
+  const tables = Array.from({length:12}, (_,i) => ({n:i+1, occ:[2,3,5,7,8,9,11].includes(i+1)}));
+  const sold = {};      // porciones vendidas hoy por postre
+  let tab = 'resumen', closing = false;
+
+  function placeOrder(where, items){
+    for (const id in items) BY[id].stock = Math.max(0, BY[id].stock - items[id]);
+    orders.unshift({id:newId(), mesa:where, items, st:'nuevo', t:Date.now()});
+    const n = tableOfMesa(where); if (n) setTable(n, true);
+    renderAll();
+    const low = Object.keys(items).map(id => BY[id]).filter(m => m.stock <= LOW);
+    if (low.length) setTimeout(() => toast(low[0].stock ? `Quedan ${low[0].stock} de ${low[0].name}` : `${low[0].name} se agotó`), 2800);
+  }
+  const delivered = () => orders.filter(o => o.st === 'entregado');
+  const sales = () => BASE + delivered().reduce((a,o) => a + itemsInfo(o.items).total, 0);
+  const ago = t => Math.max(1, Math.round((Date.now() - t) / 60000)) + ' min';
+  const occCount = () => tables.filter(t => t.occ).length;
+  function setTable(n, occ){ const t = tables[n-1]; if (t) t.occ = occ; }
+  function tableOfMesa(name){ const m = /Mesa (\d+)/.exec(name); return m ? +m[1] : 0; }
+  const lines = o => Object.entries(o.items).map(([id,q]) => `<li>${q} × ${BY[id].name}</li>`).join('');
+
+  function advance(id){
+    const o = orders.find(x => x.id === id); if (!o) return;
+    const i = FLOW.indexOf(o.st);
+    if (i < 0 || i >= FLOW.length - 1) return;
+    o.st = FLOW[i + 1];
+    if (o.st === 'entregado') {
+      for (const k in o.items) sold[k] = (sold[k] || 0) + o.items[k];
+      const n = tableOfMesa(o.mesa);
+      if (n && !orders.some(x => x.mesa === o.mesa && x.st !== 'entregado')) setTable(n, false);
+      toast('Pedido entregado · ' + fmt(itemsInfo(o.items).total));
+    }
+    renderAll();
+  }
+  function card(o){
+    const {count, total} = itemsInfo(o.items);
+    return `<article class="ord">
+      <div class="ord-top"><span class="oid">#${o.id}</span><span class="tag ${o.st}">${LBL[o.st]}</span></div>
+      <strong class="omesa">${o.mesa}</strong>
+      <span class="ometa">${fmt(total)} · ${count} ${count===1?'ítem':'ítems'} · hace ${ago(o.t)}</span>
+      <button class="act" data-order="${o.id}">${ACT[o.st]}</button>
+    </article>`;
+  }
+
+  const views = {
+    resumen(){
+      const cols = [['Nuevos',['nuevo']], ['En obrador',['obrador']], ['Listos / en la mesa',['listo','camino']]];
+      return `<div class="board">` + cols.map(([name, sts]) => {
+        const list = orders.filter(o => sts.includes(o.st));
+        return `<section class="col"><header>${name} <span class="count">${list.length}</span></header>${
+          list.length ? list.map(card).join('') : '<p class="empty">Sin pedidos</p>'}</section>`;
+      }).join('') + `</div>`;
+    },
+    mesas(){
+      const zones = ZONES.map(z => {
+        const ts = tables.filter(t => t.n >= z.from && t.n <= z.to);
+        return `<span>${z.name} <b class="num">${ts.filter(t => t.occ).length}/${ts.length}</b></span>`;
+      }).join(' · ');
+      return `<p class="hint">Toca una mesa para marcarla libre u ocupada. ${zones}</p><div class="tables">` +
+        tables.map(t => {
+          const z = ZONES.find(z => t.n >= z.from && t.n <= z.to).name;
+          return `<button class="table-btn ${t.occ?'occ':''}" data-table="${t.n}" aria-pressed="${t.occ}">
+          <b>Mesa ${t.n}</b><span>${t.occ?'Ocupada':'Libre'} · ${z}</span></button>`;
+        }).join('') + `</div>`;
+    },
+    vitrina(){
+      const trays = MENU.filter(m => m.cat !== 'Bebidas');
+      return `<p class="hint">Porciones que quedan en la vitrina. Se descuentan solas con cada pedido; al reponer entra una bandeja nueva del obrador.</p><div class="case">` +
+        trays.map(m => {
+          const pct = Math.min(100, Math.round(m.stock / m.batch * 100));
+          const st = m.stock === 0 ? 'Agotado' : m.stock <= LOW ? 'Quedan pocas' : 'Disponible';
+          return `<div class="tray ${m.stock <= LOW ? 'low' : ''}">
+            ${tile(m)}
+            <h4>${m.name}<span>${m.stock}</span></h4>
+            <div class="bar"><i style="width:${pct}%"></i></div>
+            <footer><span>${st}</span><button class="act ghost" data-restock="${m.id}">Reponer +${m.batch}</button></footer>
+          </div>`;
+        }).join('') + `</div>`;
+    },
+    obrador(){
+      const list = orders.filter(o => o.st === 'nuevo' || o.st === 'obrador');
+      if (!list.length) return '<p class="empty">El obrador no tiene pedidos pendientes.</p>';
+      return list.map(o => `<div class="row">
+        <div><strong class="omesa" style="font-size:18px">${o.mesa}</strong>
+        <div class="ometa">#${o.id} · hace ${ago(o.t)}</div>
+        <ul class="olines">${lines(o)}</ul></div>
+        <div style="display:flex;gap:8px;align-items:center"><span class="tag ${o.st}">${LBL[o.st]}</span>
+        <button class="act" data-order="${o.id}">${ACT[o.st]}</button></div></div>`).join('');
+    },
+    caja(){
+      const s = sales();
+      const methods = [['Pago móvil',.45],['Efectivo',.30],['Punto de venta',.25]];
+      const top = Object.entries(sold).sort((a,b) => b[1] - a[1]).slice(0, 3);
+      return `<div class="bars">` + methods.map(([name, p]) => {
+        const v = Math.round(s * p);
+        return `<div><div class="lbl"><span>${name}</span><span>${fmt(v)}</span></div>
+          <div class="track"><i style="width:${Math.round(p*100)}%"></i></div></div>`;
+      }).join('') + `</div>
+      <div class="top"><h4>Lo más pedido hoy</h4>${top.length
+        ? `<ol>${top.map(([id,q]) => `<li>${BY[id].name}<span>× ${q}</span></li>`).join('')}</ol>`
+        : '<p class="empty" style="padding:0">Aparece al entregar los primeros pedidos.</p>'}</div>
+      <div class="close">` + (closing
+        ? `<span style="font-weight:700">¿Cerrar el día con ${fmt(s)}?</span>
+           <button class="act" data-confirm="1">Sí, cerrar caja</button>
+           <button class="act ghost" data-cancel="1">Cancelar</button>`
+        : `<button class="act ghost" data-close="1">Cerrar caja</button>`) + `</div>`;
+    }
+  };
+
+  function renderPanel(){ $('#panel').innerHTML = views[tab](); }
+  function renderKpis(){
+    $('#kSales').textContent = fmt(sales());
+    $('#kActive').textContent = orders.filter(o => o.st !== 'entregado').length;
+    $('#kUnconf').textContent = orders.filter(o => o.st === 'nuevo').length + ' sin confirmar';
+    $('#kTables').textContent = occCount();
+    const low = MENU.filter(m => m.cat !== 'Bebidas' && m.stock <= LOW).length;
+    $('#lowDot').hidden = !low; $('#lowDot').textContent = low;
+    if (idx === 2) $('#bigSales').textContent = fmt(sales());
+    renderTicket();
+  }
+  function renderAll(){ renderKpis(); renderPanel(); }
+
+  // El ticket de la escena 2 muestra el último pedido que hizo esta mesa (o uno de ejemplo)
+  function renderTicket(){
+    const o = orders.find(x => x.mesa === 'Mesa ' + mesa) || {id:'A1F2', items:{tres:1, marq:1, cafe:2}};
+    $('#tkHead').textContent = `Pedido #${o.id.slice(0,4)} · Mesa ${mesa}`;
+    $('#tkLines').innerHTML = Object.entries(o.items).map(([id,q]) =>
+      `<li><span>${q} × ${BY[id].name}</span><span class="num">${fmt(q * BY[id].price)}</span></li>`).join('');
+    $('#tkTotal').textContent = fmt(itemsInfo(o.items).total);
+  }
+
+  $$('.tab').forEach(b => b.addEventListener('click', () => {
+    tab = b.dataset.tab; closing = false;
+    $$('.tab').forEach(x => x.setAttribute('aria-selected', x === b ? 'true' : 'false'));
+    renderPanel();
+  }));
+  $('#panel').addEventListener('click', e => {
+    const t = e.target.closest('button'); if (!t) return;
+    if (t.dataset.order) advance(t.dataset.order);
+    else if (t.dataset.table) { const n = +t.dataset.table; setTable(n, !tables[n-1].occ); renderAll(); }
+    else if (t.dataset.restock) {
+      const m = BY[t.dataset.restock]; m.stock += m.batch;
+      renderAll(); renderList(); toast(`Vitrina repuesta · ${m.name}`);
+    }
+    else if (t.dataset.close) { closing = true; renderPanel(); }
+    else if (t.dataset.cancel) { closing = false; renderPanel(); }
+    else if (t.dataset.confirm) { closing = false; renderPanel(); toast('Caja cerrada con ' + fmt(sales())); }
+  });
+
+  /* ---------- Escenario: escenas, progreso, pausa al tocar ---------- */
+  const frame = $('#frame');
+  const scenes = $$('.scene', frame);
+  const segs = $$('#progress .seg');
+  let idx = 0, timer = null, resumeT = null, paused = false;
+  const DUR = 5000;
+
+  function show(i){
+    idx = (i + scenes.length) % scenes.length;
+    scenes.forEach((s,k) => s.classList.toggle('on', k === idx));
+    segs.forEach((s,k) => {
+      s.classList.remove('on'); void s.offsetWidth; // reinicia la barra
+      s.classList.toggle('on', k === idx);
+      s.classList.toggle('done', k < idx);
+      s.setAttribute('aria-current', k === idx ? 'true' : 'false');
+    });
+    if (idx === 2) countUp($('#bigSales'), sales(), 1200);
+    schedule();
+  }
+  function schedule(){
+    clearTimeout(timer);
+    if (!paused && !reduce) timer = setTimeout(() => show(idx + 1), DUR);
+  }
+  // Tocar el escenario (por ejemplo, para usar la carta) pausa la historia un rato
+  function pauseFor(ms){
+    paused = true; frame.classList.add('paused'); clearTimeout(timer); clearTimeout(resumeT);
+    resumeT = setTimeout(() => { paused = false; frame.classList.remove('paused'); show(idx); }, ms);
+  }
+  frame.addEventListener('pointerdown', () => pauseFor(10000));
+  frame.addEventListener('focusin', () => pauseFor(10000));
+  $('#prev').addEventListener('click', () => show(idx - 1));
+  $('#next').addEventListener('click', () => show(idx + 1));
+  segs.forEach((s,k) => s.addEventListener('click', () => show(k)));
+  document.addEventListener('keydown', e => {
+    if (e.target.matches('input')) return;
+    if (e.key === 'ArrowRight') show(idx + 1);
+    if (e.key === 'ArrowLeft') show(idx - 1);
+  });
+
+  function countUp(el, to, ms){
+    if (reduce) { el.textContent = fmt(to); return; }
+    const t0 = performance.now();
+    (function step(t){
+      const p = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(to * e);
+      if (p < 1 && idx === 2) requestAnimationFrame(step);
+    })(t0);
+  }
+
+  /* ---------- Avisos ---------- */
+  const toastEl = $('#toast'); let tt;
+  function toast(msg){
+    toastEl.textContent = msg; toastEl.classList.add('on');
+    clearTimeout(tt); tt = setTimeout(() => toastEl.classList.remove('on'), 2600);
+  }
+  // Llegan algunos pedidos de ejemplo mientras se mira la página
+  const incoming = [
+    {mesa:'Mesa 6',      items:{marq:1, cafe:1}},
+    {mesa:'Para llevar', items:{tres:2, alfa:1, choco:1}},
+    {mesa:'Mesa 10',     items:{bien:1, choc:1}}
+  ];
+  let inc = 0;
+  const feed = setInterval(() => {
+    if (document.hidden) return;
+    if (inc >= incoming.length) return clearInterval(feed);
+    const p = incoming[inc++];
+    const items = {};
+    for (const id in p.items) { const q = Math.min(p.items[id], BY[id].stock); if (q) items[id] = q; }
+    if (!Object.keys(items).length) return;
+    placeOrder(p.mesa, items); renderList();
+    toast('Nuevo pedido · ' + p.mesa);
+  }, 16000);
+  setInterval(() => { if (tab === 'resumen' || tab === 'obrador') renderPanel(); }, 30000);
+
+  /* ---------- Inicio ---------- */
+  renderChips(); renderList(); renderCart(); renderAll();
+  show(0);
+})();
+</script>
