@@ -1,0 +1,65 @@
+/* Paleta y piezas comunes de La Dulcería: chocolate arriba, crema y blanco abajo. */
+:root{
+  --bg:#F4EADB;          /* crema */
+  --surface:#FFFDF9;     /* blanco */
+  --latte:#EADBC4;
+  --ink:#2B1A10;
+  --muted:#7F6654;
+  --cocoa:#4A2C1A;
+  --cocoa-hi:#3A2213;
+  --caramel:#B9783F;
+  --caramel-hi:#E8B47E;
+  --line:rgba(43,26,16,.12);
+  --ok:#56703F;
+  --warn:#A8692A;
+  --low:#B0472F;
+  --stage:#1F130B;
+  --stage-fg:#F6EEE2;
+  --stage-muted:#C2AB93;
+  --display:"Fraunces", Georgia, "Times New Roman", serif;
+  --body:"Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:500 15px/1.5 var(--body);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+button:disabled{cursor:default;opacity:.45}
+button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid var(--caramel);outline-offset:2px}
+[hidden]{display:none!important}
+.wrap{margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.num{font-variant-numeric:tabular-nums}
+
+.logo{font-family:var(--display);font-style:italic;font-weight:600;font-size:24px;letter-spacing:-.01em;color:var(--stage-fg)}
+.logo span{color:var(--caramel-hi)}
+.pill{display:inline-flex;align-items:center;gap:8px;border:1px solid currentColor;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.pill i{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
+
+.tile{flex:none;width:52px;height:52px;border-radius:14px;color:#FFF6EA;display:grid;place-items:center;font-family:var(--display);font-style:italic;font-weight:600;font-size:18px;letter-spacing:-.02em;box-shadow:inset 0 -6px 0 rgba(0,0,0,.12)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--cocoa);color:var(--surface);font-weight:800;font-size:14px;border-radius:999px;padding:11px 18px;white-space:nowrap}
+.btn:hover:not(:disabled){background:var(--cocoa-hi)}
+.btn.ghost{background:transparent;color:var(--cocoa);border:1px solid var(--cocoa)}
+.btn.ghost:hover:not(:disabled){background:rgba(74,44,26,.06)}
+.btn.caramel{background:var(--caramel-hi);color:var(--ink)}
+.btn.caramel:hover:not(:disabled){background:#DDA46B}
+.btn.sm{font-size:12.5px;padding:8px 13px}
+
+.tag{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:4px 9px;white-space:nowrap}
+.tag.nuevo{background:rgba(185,120,63,.18);color:#8A4F22}
+.tag.preparando{background:rgba(168,105,42,.16);color:var(--warn)}
+.tag.listo{background:rgba(86,112,63,.16);color:var(--ok)}
+.tag.entregado{background:rgba(74,44,26,.1);color:var(--cocoa)}
+.tag.cancelado{background:rgba(176,71,47,.12);color:var(--low)}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,200%);background:var(--ink);color:var(--surface);border-radius:999px;padding:12px 18px;font-weight:700;font-size:14px;z-index:50;transition:transform .35s ease;max-width:calc(100% - 32px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toast.on{transform:translate(-50%,0)}
+.toast.err{background:var(--low)}
+.toast.raise{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+
+.demo{background:var(--caramel-hi);color:var(--ink);font-size:12.5px;font-weight:700;text-align:center;padding:6px 16px}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}

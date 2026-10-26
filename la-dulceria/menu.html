@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1F130B">
+<title>La Dulcería · Carta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="estilo.css">
+<style>
+/* Carta para el teléfono del cliente: cabecera de chocolate, lista sobre crema, carrito fijo abajo. */
+.wrap{max-width:620px}
+.top{background:var(--stage);color:var(--stage-fg);position:relative;overflow:hidden;padding-block:calc(18px + env(safe-area-inset-top,0px)) 30px}
+.top::before,.top::after{content:"";position:absolute;width:60%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(232,164,96,.45),rgba(232,164,96,0) 68%);pointer-events:none}
+.top::before{left:-20%;top:-30%}
+.top::after{right:-25%;bottom:-60%;background:radial-gradient(circle,rgba(246,220,190,.25),rgba(246,220,190,0) 68%)}
+.top .wrap{position:relative}
+.brandbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}
+.brandbar .pill{color:var(--caramel-hi);background:rgba(185,120,63,.14)}
+.top h1{font-family:var(--display);font-weight:700;font-size:clamp(32px,9vw,46px);line-height:1.04;letter-spacing:-.02em;margin:0;text-wrap:balance}
+.top h1 em{color:var(--caramel-hi);font-weight:600}
+.top p{margin:10px 0 0;color:var(--stage-muted);max-width:40ch}
+
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);padding-block:12px 8px;border-bottom:1px solid var(--line)}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:0 12px}
+.search svg{flex:none;color:var(--muted)}
+.search input{border:0;background:transparent;width:100%;padding:12px 0;font-size:16px;outline:none}
+.search input::placeholder{color:var(--muted)}
+.chips{display:flex;gap:6px;margin-top:10px;overflow-x:auto;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;font-size:13px;font-weight:700;padding:7px 14px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:var(--surface)}
+.chip[aria-pressed="true"]{background:var(--cocoa);color:var(--surface);border-color:var(--cocoa)}
+
+main{padding-block:14px 130px}
+.cat{font-family:var(--display);font-weight:700;font-size:22px;margin:18px 2px 10px;color:var(--cocoa)}
+.cat:first-child{margin-top:4px}
+.items{display:flex;flex-direction:column;gap:10px}
+.item{display:flex;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px}
+.item.out{opacity:.55}
+.info{flex:1;min-width:0}
+.info h3{margin:0;font-size:15px;font-weight:800;line-height:1.25}
+.info p{margin:2px 0 6px;font-size:13px;color:var(--muted);line-height:1.35}
+.price{font-size:14px;font-weight:800;color:var(--cocoa);font-variant-numeric:tabular-nums}
+.left{font-size:11.5px;font-weight:800;color:var(--low);margin-left:8px}
+.soldout{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--low);background:rgba(176,71,47,.1);border-radius:999px;padding:5px 10px}
+.qty{flex:none;display:flex;align-items:center;gap:4px;background:var(--latte);border-radius:999px;padding:3px}
+.qty button{width:32px;height:32px;border-radius:50%;background:var(--surface);font-weight:800;font-size:17px;color:var(--cocoa)}
+.qty span{min-width:18px;text-align:center;font-weight:800;font-variant-numeric:tabular-nums}
+.add{flex:none;width:38px;height:38px;border-radius:50%;background:var(--cocoa);color:var(--surface);font-size:22px;font-weight:700;line-height:1}
+.empty{text-align:center;color:var(--muted);padding:30px 10px;margin:0}
+
+/* Mis pedidos */
+.mine{display:grid;gap:10px;margin-top:16px}
+.mine h2{font-family:var(--display);font-size:22px;margin:0 2px;color:var(--cocoa)}
+.track{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;gap:10px}
+.track header{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:var(--muted);font-weight:700}
+.track .msg{font-family:var(--display);font-size:19px;font-weight:600;color:var(--ink);margin:0}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:11px;font-weight:800;color:var(--muted);text-align:center}
+.steps li{padding-top:12px;position:relative}
+.steps li::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;border-radius:5px;background:var(--latte);transition:background .4s}
+.steps li.on{color:var(--ink)}
+.steps li.on::before{background:var(--caramel)}
+.track ul.lines{list-style:none;margin:0;padding:10px 0 0;border-top:1px dashed var(--line);display:grid;gap:3px;font-size:13px}
+.track ul.lines li{display:flex;justify-content:space-between;gap:10px}
+.track .tot{display:flex;justify-content:space-between;font-weight:800;font-variant-numeric:tabular-nums}
+
+/* Carrito */
+.cartbar{position:fixed;left:0;right:0;bottom:0;z-index:10;padding:10px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:linear-gradient(rgba(244,234,219,0),var(--bg) 30%)}
+.cartbar button{width:100%;max-width:588px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--cocoa);color:var(--surface);border-radius:18px;padding:14px 18px;box-shadow:0 16px 30px -14px rgba(43,26,16,.6)}
+.cartbar .cnt{background:var(--caramel-hi);color:var(--ink);border-radius:999px;font-size:13px;font-weight:800;padding:2px 9px;font-variant-numeric:tabular-nums}
+.cartbar b{font-size:16px;font-variant-numeric:tabular-nums}
+.cartbar span.lbl{font-weight:800;flex:1;text-align:left}
+
+.sheet{position:fixed;inset:0;z-index:20;display:flex;align-items:flex-end;justify-content:center;background:rgba(31,19,11,.5)}
+.sheet .box{width:100%;max-width:620px;max-height:88vh;overflow-y:auto;background:var(--bg);border-radius:24px 24px 0 0;padding:20px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:grid;gap:14px;animation:up .3s ease}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+.sheet header{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.sheet h2{font-family:var(--display);font-size:24px;margin:0}
+.tile.sm{width:40px;height:40px;font-size:15px;border-radius:12px}
+.x{width:36px;height:36px;border-radius:50%;background:var(--latte);font-size:20px;line-height:1}
+.clines{display:grid;gap:8px}
+.cline{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.cline .n{flex:1;min-width:0;font-weight:700;font-size:14px}
+.cline .n small{display:block;color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums}
+.sheet label{font-size:13px;font-weight:700;color:var(--muted);display:grid;gap:6px}
+.sheet textarea{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:10px 12px;font-size:16px;resize:none;min-height:64px}
+.sum{display:flex;justify-content:space-between;align-items:baseline;font-weight:800;font-size:17px}
+.sum b{font-family:var(--display);font-size:26px;font-variant-numeric:tabular-nums}
+.sheet .btn{width:100%;padding:15px;font-size:16px}
+.note{font-size:12.5px;color:var(--muted);text-align:center;margin:0}
+
+.nomesa{min-height:100vh;display:grid;place-items:center;text-align:center;background:var(--stage);color:var(--stage-fg);padding:24px}
+.nomesa h1{font-family:var(--display);font-size:32px;margin:14px 0 8px}
+.nomesa p{color:var(--stage-muted);margin:0;max-width:32ch}
+</style>
+</head>
+<body>
+<div class="demo" id="demo" hidden>Modo demo: los pedidos solo llegan al panel abierto en este mismo navegador.</div>
+
+<div class="nomesa" id="nomesa" hidden>
+  <div>
+    <span class="logo">La Dulcer<span>í</span>a</span>
+    <h1>Escanea el QR de tu mesa</h1>
+    <p>Cada mesa tiene su propio código. Así sabemos a dónde llevar tu pedido.</p>
+  </div>
+</div>
+
+<div id="app" hidden>
+  <header class="top">
+    <div class="wrap">
+      <div class="brandbar">
+        <span class="logo">La Dulcer<span>í</span>a</span>
+        <span class="pill"><i></i>Mesa <span class="num" data-mesa></span></span>
+      </div>
+      <h1>¿Qué se te antoja <em>hoy?</em></h1>
+      <p>Pide desde aquí y te lo llevamos a la mesa. Pagas al recibirlo.</p>
+    </div>
+  </header>
+
+  <section class="wrap mine" id="mine" hidden aria-live="polite"></section>
+
+  <div class="bar">
+    <div class="wrap">
+      <label class="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Buscar un postre" aria-label="Buscar en la carta" autocomplete="off">
+      </label>
+      <div class="chips" id="chips" role="group" aria-label="Categorías"></div>
+    </div>
+  </div>
+
+  <main class="wrap" id="lista"><p class="empty">Cargando la carta…</p></main>
+
+  <div class="cartbar" id="cartbar" hidden>
+    <button id="verPedido"><span class="cnt" id="cnt">0</span><span class="lbl">Ver mi pedido</span><b id="cartTotal">$ 0</b></button>
+  </div>
+
+  <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="box">
+      <header><h2 id="sheetTitle">Tu pedido · Mesa <span data-mesa></span></h2><button class="x" id="cerrar" aria-label="Cerrar">×</button></header>
+      <div class="clines" id="clines"></div>
+      <label>¿Algo que debamos saber? (opcional)
+        <textarea id="nota" maxlength="200" placeholder="Ej.: sin canela, para compartir…"></textarea>
+      </label>
+      <div class="sum"><span>Total</span><b id="sumTotal">$ 0</b></div>
+      <button class="btn" id="enviar">Enviar pedido</button>
+      <p class="note">Pagas al recibirlo: pago móvil, efectivo o punto de venta.</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="datos.js"></script>
+<script>
+(function(){
+  const D = window.Datos, $ = s => document.querySelector(s);
+  const {fmt, esc} = D;
+
+  const mesa = parseInt(new URLSearchParams(location.search).get('mesa'), 10);
+  if (!(mesa >= 1 && mesa <= D.mesas)) { $('#nomesa').hidden = false; return; }
+  $('#app').hidden = false;
+  $('#demo').hidden = D.modo !== 'demo';
+  document.querySelectorAll('[data-mesa]').forEach(el => el.textContent = mesa);
+  document.title = `La Dulcería · Mesa ${mesa}`;
+
+  let productos = [], cat = 'Todos', query = '';
+  const cart = {};   // id -> cantidad
+  const byId = id => productos.find(p => p.id === id);
+
+  /* ---------- Avisos ---------- */
+  let tt;
+  function toast(msg, err){
+    const t = $('#toast');
+    t.textContent = msg; t.classList.toggle('err', !!err);
+    t.classList.toggle('raise', !$('#cartbar').hidden);
+    t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 3200);
+  }
+
+  /* ---------- Carta ---------- */
+  const tile = (p, sm) => `<div class="tile${sm ? ' sm' : ''}" style="background:linear-gradient(145deg,${esc(p.color)},color-mix(in srgb,${esc(p.color)} 70%,#2B1A10))" aria-hidden="true">${esc(p.sigla)}</div>`;
+
+  function renderChips(){
+    const cats = ['Todos', ...new Set(productos.map(p => p.categoria))];
+    $('#chips').innerHTML = cats.map(c => `<button class="chip" data-cat="${esc(c)}" aria-pressed="${c === cat}">${esc(c)}</button>`).join('');
+  }
+  function itemHtml(p){
+    const n = cart[p.id] || 0, out = p.stock === 0;
+    const left = !out && p.stock <= 3 ? `<span class="left">Quedan ${p.stock}</span>` : '';
+    const ctrl = out ? '<span class="soldout">Agotado</span>'
+      : n ? `<div class="qty"><button data-dec="${esc(p.id)}" aria-label="Quitar uno de ${esc(p.nombre)}">−</button><span>${n}</span><button data-inc="${esc(p.id)}" aria-label="Agregar otro ${esc(p.nombre)}" ${n >= p.stock ? 'disabled' : ''}>+</button></div>`
+      : `<button class="add" data-inc="${esc(p.id)}" aria-label="Agregar ${esc(p.nombre)}">+</button>`;
+    return `<article class="item${out ? ' out' : ''}">${tile(p)}
+      <div class="info"><h3>${esc(p.nombre)}</h3><p>${esc(p.descripcion)}</p><span class="price">${fmt(p.precio)}</span>${left}</div>${ctrl}</article>`;
+  }
+  function renderList(){
+    const q = query.trim().toLowerCase();
+    const vis = productos.filter(p => (cat === 'Todos' || p.categoria === cat) &&
+      (!q || p.nombre.toLowerCase().includes(q) || p.descripcion.toLowerCase().includes(q)));
+    if (!vis.length) { $('#lista').innerHTML = '<p class="empty">Ningún postre coincide con la búsqueda.</p>'; return; }
+    const grupos = [...new Set(vis.map(p => p.categoria))];
+    $('#lista').innerHTML = grupos.map(g => `<h2 class="cat">${esc(g)}</h2><div class="items">${
+      vis.filter(p => p.categoria === g).map(itemHtml).join('')}</div>`).join('');
+  }
+
+  /* ---------- Carrito ---------- */
+  function cartInfo(){
+    let count = 0, total = 0;
+    for (const id in cart) { const p = byId(id); if (p) { count += cart[id]; total += cart[id] * p.precio; } }
+    return {count, total};
+  }
+  function renderCart(){
+    const {count, total} = cartInfo();
+    $('#cartbar').hidden = count === 0;
+    $('#cnt').textContent = count;
+    $('#cartTotal').textContent = fmt(total);
+    $('#sumTotal').textContent = fmt(total);
+    $('#clines').innerHTML = Object.keys(cart).map(id => {
+      const p = byId(id); if (!p) return '';
+      return `<div class="cline">${tile(p, true)}
+        <div class="n">${esc(p.nombre)}<small>${fmt(p.precio * cart[id])}</small></div>
+        <div class="qty"><button data-dec="${esc(id)}" aria-label="Quitar uno">−</button><span>${cart[id]}</span><button data-inc="${esc(id)}" aria-label="Agregar otro" ${cart[id] >= p.stock ? 'disabled' : ''}>+</button></div></div>`;
+    }).join('');
+    if (!count) cerrar();
+  }
+  function cambiar(id, d){
+    const p = byId(id); if (!p) return;
+    const n = Math.max(0, Math.min(p.stock, (cart[id] || 0) + d));
+    if (n) cart[id] = n; else delete cart[id];
+    renderList(); renderCart();
+  }
+  document.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b || b.disabled) return;
+    if (b.dataset.inc) cambiar(b.dataset.inc, 1);
+    else if (b.dataset.dec) cambiar(b.dataset.dec, -1);
+    else if (b.dataset.cat) { cat = b.dataset.cat; renderChips(); renderList(); }
+  });
+  $('#q').addEventListener('input', e => { query = e.target.value; renderList(); });
+
+  function abrir(){ $('#sheet').hidden = false; document.body.style.overflow = 'hidden'; }
+  function cerrar(){ $('#sheet').hidden = true; document.body.style.overflow = ''; }
+  $('#verPedido').addEventListener('click', abrir);
+  $('#cerrar').addEventListener('click', cerrar);
+  $('#sheet').addEventListener('click', e => { if (e.target.id === 'sheet') cerrar(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrar(); });
+
+  $('#enviar').addEventListener('click', async () => {
+    const items = Object.entries(cart).map(([id, cantidad]) => ({id, cantidad}));
+    if (!items.length) return;
+    const btn = $('#enviar'); btn.disabled = true; btn.textContent = 'Enviando…';
+    const id = D.uuid();
+    try {
+      await D.hacerPedido({id, mesa, items, nota: $('#nota').value.trim()});
+      Object.keys(cart).forEach(k => delete cart[k]);
+      $('#nota').value = '';
+      guardarMio(id);
+      cerrar(); toast('¡Pedido enviado! Ya lo están viendo en el mostrador.');
+      await Promise.all([cargarProductos(), cargarMios()]);
+      $('#mine').scrollIntoView({behavior:'smooth', block:'start'});
+    } catch (err) {
+      toast(err.message || 'No se pudo enviar. Revisa tu conexión e inténtalo de nuevo.', true);
+      cargarProductos();
+    } finally {
+      btn.disabled = false; btn.textContent = 'Enviar pedido';
+    }
+  });
+
+  async function cargarProductos(){
+    try {
+      productos = (await D.productos()).filter(p => p.activo);
+      for (const id in cart) {   // ajusta el carrito si cambió la vitrina
+        const p = byId(id);
+        if (!p || p.stock === 0) delete cart[id]; else cart[id] = Math.min(cart[id], p.stock);
+      }
+      renderChips(); renderList(); renderCart();
+    } catch (err) {
+      $('#lista').innerHTML = '<p class="empty">No pudimos cargar la carta. Revisa tu conexión y recarga la página.</p>';
+    }
+  }
+
+  /* ---------- Mis pedidos (se recuerdan en este teléfono) ---------- */
+  const KEY = 'dulceria-mis-pedidos-' + mesa;
+  const leerMios = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch(e) { return []; } };
+  let memMios = leerMios();
+  function guardarMio(id){
+    memMios = [id, ...memMios].slice(0, 10);
+    try { localStorage.setItem(KEY, JSON.stringify(memMios)); } catch(e){}
+  }
+  const PASOS = ['nuevo','preparando','listo','entregado'];
+  const MSG = {
+    nuevo:'Recibimos tu pedido', preparando:'Lo estamos preparando',
+    listo:'¡Está listo! Ya va a tu mesa', entregado:'Entregado. ¡Que lo disfrutes!',
+    cancelado:'No pudimos preparar este pedido. Pregunta en el mostrador.'
+  };
+  const ETIQ = {nuevo:'Recibido', preparando:'Preparando', listo:'Listo', entregado:'Entregado', cancelado:'Cancelado'};
+  const previos = {};
+  async function cargarMios(){
+    if (!memMios.length) return;
+    let lista;
+    try { lista = await D.estadoPedidos(memMios); } catch(e) { return; }
+    const hoy = D.inicioDeHoy();
+    lista = lista.filter(o => o.creado >= hoy).sort((a, b) => b.creado.localeCompare(a.creado));
+    lista.forEach(o => {
+      if (previos[o.id] && previos[o.id] !== o.estado) {
+        toast(MSG[o.estado], o.estado === 'cancelado');
+        if (navigator.vibrate) navigator.vibrate(200);
+      }
+      previos[o.id] = o.estado;
+    });
+    $('#mine').hidden = !lista.length;
+    $('#mine').innerHTML = lista.length ? `<h2>Mis pedidos</h2>` + lista.map(o => {
+      const i = PASOS.indexOf(o.estado);
+      const hora = new Date(o.creado).toLocaleTimeString('es-VE', {hour:'2-digit', minute:'2-digit'});
+      return `<article class="track">
+        <header><span>Pedido de las ${hora}</span><span class="tag ${o.estado}">${ETIQ[o.estado]}</span></header>
+        <p class="msg">${MSG[o.estado]}</p>
+        ${o.estado === 'cancelado' ? '' : `<ol class="steps">${['Recibido','Preparando','Listo','En tu mesa'].map((s, k) => `<li class="${k <= i ? 'on' : ''}">${s}</li>`).join('')}</ol>`}
+        <ul class="lines">${o.items.map(l => `<li><span>${l.cantidad} × ${esc(l.nombre)}</span><span class="num">${fmt(l.cantidad * l.precio)}</span></li>`).join('')}</ul>
+        <div class="tot"><span>Total</span><span>${fmt(o.total)}</span></div>
+      </article>`;
+    }).join('') : '';
+  }
+
+  D.alCambiarProductos(cargarProductos);
+  D.alCambiarMisPedidos(cargarMios);
+  cargarProductos(); cargarMios();
+})();
+</script>
+</body>
+</html>
